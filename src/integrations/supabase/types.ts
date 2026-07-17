@@ -14,16 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          email: string | null
+          id: string
+          nome: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_modulos: {
+        Row: {
+          id: string
+          modulo: Database["public"]["Enums"]["app_modulo"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          modulo: Database["public"]["Enums"]["app_modulo"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          modulo?: Database["public"]["Enums"]["app_modulo"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      tem_modulo: {
+        Args: {
+          _modulo: Database["public"]["Enums"]["app_modulo"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_modulo:
+        | "solicitacoes"
+        | "cotacoes"
+        | "ordens"
+        | "financeiro"
+        | "obras"
+        | "fornecedores"
+        | "insumos"
+      app_role: "admin" | "usuario"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +236,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_modulo: [
+        "solicitacoes",
+        "cotacoes",
+        "ordens",
+        "financeiro",
+        "obras",
+        "fornecedores",
+        "insumos",
+      ],
+      app_role: ["admin", "usuario"],
+    },
   },
 } as const
