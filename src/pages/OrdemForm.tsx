@@ -150,11 +150,11 @@ export default function OrdemForm() {
     const fonte = decisoes.length
       ? decisoes.map((d: any) => ({ item_id: d.cotacao_item_id }))
       : (cot.cotacao_itens || []).map((it: any) => ({ item_id: it.id }));
-    const its: Item[] = fonte.map((&: any) => {
+    const its: Item[] = fonte.map(({ item_id }: any) => {
       const it: any = (cot.cotacao_itens || []).find((x: any) => x.id === item_id);
       const pr: any = (cot.cotacao_precos || []).find((p: any) => p.cotacao_item_id === item_id && p.cotacao_fornecedor_id === cotForn.id);
       return { descricao: it?.item || "", quantidade: Number(it?.quantidade || 1), unidade: it?.unidade || "", preco_unitario: Number(pr?.preco_unitario || 0) };
-    }).filter(i => i.descricao);
+    }).filter((i: Item) => i.descricao);
     if (its.length) { setItens(its); setFromCotacao(true); }
   };
 
