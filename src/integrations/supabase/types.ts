@@ -82,6 +82,531 @@ export type Database = {
           },
         ]
       }
+      contas_pagar: {
+        Row: {
+          centro_custo_id: string | null
+          created_at: string
+          data_pagamento: string | null
+          descricao: string
+          fornecedor_id: string | null
+          id: string
+          obra_id: string | null
+          ordem_compra_id: string | null
+          status: string
+          updated_at: string
+          valor: number
+          vencimento: string
+        }
+        Insert: {
+          centro_custo_id?: string | null
+          created_at?: string
+          data_pagamento?: string | null
+          descricao: string
+          fornecedor_id?: string | null
+          id?: string
+          obra_id?: string | null
+          ordem_compra_id?: string | null
+          status?: string
+          updated_at?: string
+          valor: number
+          vencimento: string
+        }
+        Update: {
+          centro_custo_id?: string | null
+          created_at?: string
+          data_pagamento?: string | null
+          descricao?: string
+          fornecedor_id?: string | null
+          id?: string
+          obra_id?: string | null
+          ordem_compra_id?: string | null
+          status?: string
+          updated_at?: string
+          valor?: number
+          vencimento?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contas_pagar_centro_custo_id_fkey"
+            columns: ["centro_custo_id"]
+            isOneToOne: false
+            referencedRelation: "centros_custo"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contas_pagar_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contas_pagar_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contas_pagar_ordem_compra_id_fkey"
+            columns: ["ordem_compra_id"]
+            isOneToOne: false
+            referencedRelation: "ordens_compra"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contas_receber: {
+        Row: {
+          centro_custo_id: string | null
+          cliente: string | null
+          created_at: string
+          data_recebimento: string | null
+          descricao: string
+          id: string
+          obra_id: string | null
+          status: string
+          updated_at: string
+          valor: number
+          vencimento: string
+        }
+        Insert: {
+          centro_custo_id?: string | null
+          cliente?: string | null
+          created_at?: string
+          data_recebimento?: string | null
+          descricao: string
+          id?: string
+          obra_id?: string | null
+          status?: string
+          updated_at?: string
+          valor: number
+          vencimento: string
+        }
+        Update: {
+          centro_custo_id?: string | null
+          cliente?: string | null
+          created_at?: string
+          data_recebimento?: string | null
+          descricao?: string
+          id?: string
+          obra_id?: string | null
+          status?: string
+          updated_at?: string
+          valor?: number
+          vencimento?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contas_receber_centro_custo_id_fkey"
+            columns: ["centro_custo_id"]
+            isOneToOne: false
+            referencedRelation: "centros_custo"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contas_receber_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cotacao_decisao: {
+        Row: {
+          cotacao_fornecedor_id: string
+          cotacao_item_id: string
+        }
+        Insert: {
+          cotacao_fornecedor_id: string
+          cotacao_item_id: string
+        }
+        Update: {
+          cotacao_fornecedor_id?: string
+          cotacao_item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotacao_decisao_cotacao_fornecedor_id_fkey"
+            columns: ["cotacao_fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "cotacao_fornecedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotacao_decisao_cotacao_item_id_fkey"
+            columns: ["cotacao_item_id"]
+            isOneToOne: true
+            referencedRelation: "cotacao_itens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cotacao_envios: {
+        Row: {
+          canal: string
+          cotacao_id: string
+          created_at: string
+          enviado_por: string | null
+          erro: string | null
+          fornecedor_email: string | null
+          fornecedor_id: string | null
+          fornecedor_nome: string | null
+          fornecedor_telefone: string | null
+          id: string
+          mensagem_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          canal: string
+          cotacao_id: string
+          created_at?: string
+          enviado_por?: string | null
+          erro?: string | null
+          fornecedor_email?: string | null
+          fornecedor_id?: string | null
+          fornecedor_nome?: string | null
+          fornecedor_telefone?: string | null
+          id?: string
+          mensagem_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          canal?: string
+          cotacao_id?: string
+          created_at?: string
+          enviado_por?: string | null
+          erro?: string | null
+          fornecedor_email?: string | null
+          fornecedor_id?: string | null
+          fornecedor_nome?: string | null
+          fornecedor_telefone?: string | null
+          id?: string
+          mensagem_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotacao_envios_cotacao_id_fkey"
+            columns: ["cotacao_id"]
+            isOneToOne: false
+            referencedRelation: "cotacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotacao_envios_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cotacao_fornecedores: {
+        Row: {
+          condicao_pagamento: string | null
+          cotacao_id: string
+          fornecedor_id: string | null
+          id: string
+          nome_avulso: string | null
+          ordem: number
+          prazo_entrega: string | null
+        }
+        Insert: {
+          condicao_pagamento?: string | null
+          cotacao_id: string
+          fornecedor_id?: string | null
+          id?: string
+          nome_avulso?: string | null
+          ordem?: number
+          prazo_entrega?: string | null
+        }
+        Update: {
+          condicao_pagamento?: string | null
+          cotacao_id?: string
+          fornecedor_id?: string | null
+          id?: string
+          nome_avulso?: string | null
+          ordem?: number
+          prazo_entrega?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotacao_fornecedores_cotacao_id_fkey"
+            columns: ["cotacao_id"]
+            isOneToOne: false
+            referencedRelation: "cotacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotacao_fornecedores_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cotacao_itens: {
+        Row: {
+          cotacao_id: string
+          id: string
+          item: string
+          ordem: number
+          quantidade: number
+          solicitacao_item_id: string | null
+          unidade: string | null
+        }
+        Insert: {
+          cotacao_id: string
+          id?: string
+          item: string
+          ordem?: number
+          quantidade?: number
+          solicitacao_item_id?: string | null
+          unidade?: string | null
+        }
+        Update: {
+          cotacao_id?: string
+          id?: string
+          item?: string
+          ordem?: number
+          quantidade?: number
+          solicitacao_item_id?: string | null
+          unidade?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotacao_itens_cotacao_id_fkey"
+            columns: ["cotacao_id"]
+            isOneToOne: false
+            referencedRelation: "cotacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotacao_itens_solicitacao_item_id_fkey"
+            columns: ["solicitacao_item_id"]
+            isOneToOne: false
+            referencedRelation: "solicitacao_itens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cotacao_precos: {
+        Row: {
+          cotacao_fornecedor_id: string
+          cotacao_item_id: string
+          id: string
+          preco_unitario: number
+        }
+        Insert: {
+          cotacao_fornecedor_id: string
+          cotacao_item_id: string
+          id?: string
+          preco_unitario?: number
+        }
+        Update: {
+          cotacao_fornecedor_id?: string
+          cotacao_item_id?: string
+          id?: string
+          preco_unitario?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotacao_precos_cotacao_fornecedor_id_fkey"
+            columns: ["cotacao_fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "cotacao_fornecedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotacao_precos_cotacao_item_id_fkey"
+            columns: ["cotacao_item_id"]
+            isOneToOne: false
+            referencedRelation: "cotacao_itens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cotacao_solicitacoes: {
+        Row: {
+          cotacao_id: string
+          solicitacao_id: string
+        }
+        Insert: {
+          cotacao_id: string
+          solicitacao_id: string
+        }
+        Update: {
+          cotacao_id?: string
+          solicitacao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotacao_solicitacoes_cotacao_id_fkey"
+            columns: ["cotacao_id"]
+            isOneToOne: false
+            referencedRelation: "cotacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotacao_solicitacoes_solicitacao_id_fkey"
+            columns: ["solicitacao_id"]
+            isOneToOne: false
+            referencedRelation: "solicitacoes_compra"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cotacoes: {
+        Row: {
+          created_at: string
+          criado_por: string | null
+          endereco_entrega: string | null
+          id: string
+          numero: number
+          obra_id: string | null
+          observacao: string | null
+          status: string
+          updated_at: string
+          usa_endereco_obra: boolean
+        }
+        Insert: {
+          created_at?: string
+          criado_por?: string | null
+          endereco_entrega?: string | null
+          id?: string
+          numero?: number
+          obra_id?: string | null
+          observacao?: string | null
+          status?: string
+          updated_at?: string
+          usa_endereco_obra?: boolean
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string | null
+          endereco_entrega?: string | null
+          id?: string
+          numero?: number
+          obra_id?: string | null
+          observacao?: string | null
+          status?: string
+          updated_at?: string
+          usa_endereco_obra?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotacoes_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documentos: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          obra_id: string | null
+          storage_path: string
+          tamanho: number | null
+          tipo: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          obra_id?: string | null
+          storage_path: string
+          tamanho?: number | null
+          tipo?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          obra_id?: string | null
+          storage_path?: string
+          tamanho?: number | null
+          tipo?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentos_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      empresa_config: {
+        Row: {
+          agencia: string | null
+          banco: string | null
+          cep: string | null
+          cidade: string | null
+          cnpj: string | null
+          conta: string | null
+          contato: string | null
+          email: string | null
+          endereco: string | null
+          id: string
+          logo_url: string | null
+          nome: string
+          razao_social: string | null
+          telefone: string | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          agencia?: string | null
+          banco?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          conta?: string | null
+          contato?: string | null
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          logo_url?: string | null
+          nome?: string
+          razao_social?: string | null
+          telefone?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agencia?: string | null
+          banco?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          conta?: string | null
+          contato?: string | null
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          logo_url?: string | null
+          nome?: string
+          razao_social?: string | null
+          telefone?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fornecedores: {
         Row: {
           categoria_id: string | null
@@ -167,6 +692,48 @@ export type Database = {
           },
         ]
       }
+      obra_orcamento: {
+        Row: {
+          categoria_id: string
+          created_at: string
+          custo_previsto: number
+          id: string
+          obra_id: string
+          updated_at: string
+        }
+        Insert: {
+          categoria_id: string
+          created_at?: string
+          custo_previsto?: number
+          id?: string
+          obra_id: string
+          updated_at?: string
+        }
+        Update: {
+          categoria_id?: string
+          created_at?: string
+          custo_previsto?: number
+          id?: string
+          obra_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "obra_orcamento_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "obra_orcamento_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       obras: {
         Row: {
           cliente: string | null
@@ -202,6 +769,208 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      ordem_itens: {
+        Row: {
+          created_at: string
+          descricao: string
+          id: string
+          ordem: number
+          ordem_id: string
+          preco_unitario: number
+          quantidade: number
+          total: number
+          unidade: string | null
+        }
+        Insert: {
+          created_at?: string
+          descricao: string
+          id?: string
+          ordem?: number
+          ordem_id: string
+          preco_unitario?: number
+          quantidade?: number
+          total?: number
+          unidade?: string | null
+        }
+        Update: {
+          created_at?: string
+          descricao?: string
+          id?: string
+          ordem?: number
+          ordem_id?: string
+          preco_unitario?: number
+          quantidade?: number
+          total?: number
+          unidade?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordem_itens_ordem_id_fkey"
+            columns: ["ordem_id"]
+            isOneToOne: false
+            referencedRelation: "ordens_compra"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ordens_compra: {
+        Row: {
+          agencia: string | null
+          banco: string | null
+          categoria_id: string | null
+          cei_obra: string | null
+          centro_custo_id: string | null
+          comprador_id: string | null
+          condicao_pagamento: string | null
+          condicoes_entrega: string | null
+          conta: string | null
+          contrato_empreiteiro: string | null
+          cotacao_id: string | null
+          created_at: string
+          data_emissao: string | null
+          desconto: number | null
+          detalhe_pagamento: string | null
+          forma_pagamento: string | null
+          fornecedor_id: string | null
+          frete_tipo: string | null
+          frete_valor: number | null
+          garantia_anos: number | null
+          id: string
+          ipi: number | null
+          numero: number
+          obra_id: string | null
+          observacao: string | null
+          prazo_entrega: string | null
+          preco_unitario: number
+          quantidade: number
+          solicitacao_id: string | null
+          solicitacao_item_id: string | null
+          status: string
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          agencia?: string | null
+          banco?: string | null
+          categoria_id?: string | null
+          cei_obra?: string | null
+          centro_custo_id?: string | null
+          comprador_id?: string | null
+          condicao_pagamento?: string | null
+          condicoes_entrega?: string | null
+          conta?: string | null
+          contrato_empreiteiro?: string | null
+          cotacao_id?: string | null
+          created_at?: string
+          data_emissao?: string | null
+          desconto?: number | null
+          detalhe_pagamento?: string | null
+          forma_pagamento?: string | null
+          fornecedor_id?: string | null
+          frete_tipo?: string | null
+          frete_valor?: number | null
+          garantia_anos?: number | null
+          id?: string
+          ipi?: number | null
+          numero?: number
+          obra_id?: string | null
+          observacao?: string | null
+          prazo_entrega?: string | null
+          preco_unitario?: number
+          quantidade?: number
+          solicitacao_id?: string | null
+          solicitacao_item_id?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          agencia?: string | null
+          banco?: string | null
+          categoria_id?: string | null
+          cei_obra?: string | null
+          centro_custo_id?: string | null
+          comprador_id?: string | null
+          condicao_pagamento?: string | null
+          condicoes_entrega?: string | null
+          conta?: string | null
+          contrato_empreiteiro?: string | null
+          cotacao_id?: string | null
+          created_at?: string
+          data_emissao?: string | null
+          desconto?: number | null
+          detalhe_pagamento?: string | null
+          forma_pagamento?: string | null
+          fornecedor_id?: string | null
+          frete_tipo?: string | null
+          frete_valor?: number | null
+          garantia_anos?: number | null
+          id?: string
+          ipi?: number | null
+          numero?: number
+          obra_id?: string | null
+          observacao?: string | null
+          prazo_entrega?: string | null
+          preco_unitario?: number
+          quantidade?: number
+          solicitacao_id?: string | null
+          solicitacao_item_id?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordens_compra_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordens_compra_centro_custo_id_fkey"
+            columns: ["centro_custo_id"]
+            isOneToOne: false
+            referencedRelation: "centros_custo"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordens_compra_cotacao_id_fkey"
+            columns: ["cotacao_id"]
+            isOneToOne: false
+            referencedRelation: "cotacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordens_compra_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordens_compra_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordens_compra_solicitacao_id_fkey"
+            columns: ["solicitacao_id"]
+            isOneToOne: false
+            referencedRelation: "solicitacoes_compra"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordens_compra_solicitacao_item_id_fkey"
+            columns: ["solicitacao_item_id"]
+            isOneToOne: false
+            referencedRelation: "solicitacao_itens"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -387,6 +1156,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      recalc_ordem_total: { Args: { p_ordem: string }; Returns: undefined }
       tem_modulo: {
         Args: {
           _modulo: Database["public"]["Enums"]["app_modulo"]
