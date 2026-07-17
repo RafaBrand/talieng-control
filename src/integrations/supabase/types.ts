@@ -14,6 +14,195 @@ export type Database = {
   }
   public: {
     Tables: {
+      categorias: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      centros_custo: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          obra_id: string | null
+          tipo: Database["public"]["Enums"]["centro_custo_tipo"]
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          obra_id?: string | null
+          tipo?: Database["public"]["Enums"]["centro_custo_tipo"]
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          obra_id?: string | null
+          tipo?: Database["public"]["Enums"]["centro_custo_tipo"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "centros_custo_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fornecedores: {
+        Row: {
+          categoria_id: string | null
+          cnpj: string | null
+          contato: string | null
+          created_at: string
+          email: string | null
+          id: string
+          nome: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          categoria_id?: string | null
+          cnpj?: string | null
+          contato?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          categoria_id?: string | null
+          cnpj?: string | null
+          contato?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fornecedores_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insumos: {
+        Row: {
+          categoria_id: string | null
+          codigo: string | null
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          unidade: string | null
+          updated_at: string
+        }
+        Insert: {
+          categoria_id?: string | null
+          codigo?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          unidade?: string | null
+          updated_at?: string
+        }
+        Update: {
+          categoria_id?: string | null
+          codigo?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          unidade?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insumos_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      obras: {
+        Row: {
+          cliente: string | null
+          created_at: string
+          data_fim: string | null
+          data_inicio: string | null
+          endereco: string | null
+          id: string
+          nome: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cliente?: string | null
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          endereco?: string | null
+          id?: string
+          nome: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cliente?: string | null
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          endereco?: string | null
+          id?: string
+          nome?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           ativo: boolean
@@ -43,6 +232,111 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      solicitacao_itens: {
+        Row: {
+          created_at: string
+          id: string
+          insumo_id: string | null
+          item: string
+          observacao: string | null
+          quantidade: number
+          solicitacao_id: string
+          unidade: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          insumo_id?: string | null
+          item: string
+          observacao?: string | null
+          quantidade?: number
+          solicitacao_id: string
+          unidade?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          insumo_id?: string | null
+          item?: string
+          observacao?: string | null
+          quantidade?: number
+          solicitacao_id?: string
+          unidade?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacao_itens_insumo_id_fkey"
+            columns: ["insumo_id"]
+            isOneToOne: false
+            referencedRelation: "insumos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacao_itens_solicitacao_id_fkey"
+            columns: ["solicitacao_id"]
+            isOneToOne: false
+            referencedRelation: "solicitacoes_compra"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solicitacoes_compra: {
+        Row: {
+          centro_custo_id: string | null
+          created_at: string
+          id: string
+          numero: number
+          obra_id: string
+          observacao: string | null
+          solicitante_id: string | null
+          status: string
+          titulo: string | null
+          updated_at: string
+          urgencia: string
+        }
+        Insert: {
+          centro_custo_id?: string | null
+          created_at?: string
+          id?: string
+          numero?: number
+          obra_id: string
+          observacao?: string | null
+          solicitante_id?: string | null
+          status?: string
+          titulo?: string | null
+          updated_at?: string
+          urgencia?: string
+        }
+        Update: {
+          centro_custo_id?: string | null
+          created_at?: string
+          id?: string
+          numero?: number
+          obra_id?: string
+          observacao?: string | null
+          solicitante_id?: string | null
+          status?: string
+          titulo?: string | null
+          updated_at?: string
+          urgencia?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacoes_compra_centro_custo_id_fkey"
+            columns: ["centro_custo_id"]
+            isOneToOne: false
+            referencedRelation: "centros_custo"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_compra_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_modulos: {
         Row: {
@@ -85,6 +379,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      gen_cc_codigo_obra: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -110,6 +405,7 @@ export type Database = {
         | "fornecedores"
         | "insumos"
       app_role: "admin" | "usuario"
+      centro_custo_tipo: "obra" | "administrativo" | "personalizado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -247,6 +543,7 @@ export const Constants = {
         "insumos",
       ],
       app_role: ["admin", "usuario"],
+      centro_custo_tipo: ["obra", "administrativo", "personalizado"],
     },
   },
 } as const
