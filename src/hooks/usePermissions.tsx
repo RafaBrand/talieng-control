@@ -2,8 +2,21 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
-export type Modulo = "solicitacoes" | "cotacoes" | "ordens" | "financeiro" | "obras" | "fornecedores" | "insumos";
-export const ALL_MODULOS: Modulo[] = ["solicitacoes", "cotacoes", "ordens", "financeiro", "obras", "fornecedores", "insumos"];
+export type Modulo =
+  | "dashboard" | "solicitacoes" | "cotacoes" | "ordens" | "financeiro"
+  | "obras" | "fornecedores" | "insumos" | "usuarios" | "relatorios";
+export const ALL_MODULOS: Modulo[] = [
+  "dashboard", "solicitacoes", "cotacoes", "ordens", "financeiro",
+  "obras", "fornecedores", "insumos", "usuarios", "relatorios",
+];
+
+export type PerfilPreset = "administrador" | "compras" | "financeiro" | "engenharia" | "personalizado";
+export const PERFIS_PRESET: Record<Exclude<PerfilPreset, "personalizado">, { label: string; role: "admin" | "usuario"; modulos: Modulo[] }> = {
+  administrador: { label: "Administrador", role: "admin", modulos: ALL_MODULOS },
+  compras: { label: "Compras", role: "usuario", modulos: ["dashboard", "solicitacoes", "cotacoes", "ordens", "fornecedores", "insumos"] },
+  financeiro: { label: "Financeiro", role: "usuario", modulos: ["dashboard", "financeiro", "ordens", "relatorios"] },
+  engenharia: { label: "Engenharia", role: "usuario", modulos: ["dashboard", "obras", "solicitacoes", "insumos", "relatorios"] },
+};
 
 type Ctx = { isAdmin: boolean; modulos: Modulo[]; loading: boolean; can: (m: Modulo) => boolean; refresh: () => Promise<void> };
 const C = createContext<Ctx>({ isAdmin: false, modulos: [], loading: true, can: () => false, refresh: async () => {} });
