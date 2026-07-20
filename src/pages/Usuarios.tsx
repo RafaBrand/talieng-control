@@ -12,11 +12,12 @@ import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Power } from "lucide-react";
 import { toast } from "sonner";
-import { ALL_MODULOS, Modulo, usePermissions } from "@/hooks/usePermissions";
+import { ALL_MODULOS, Modulo, PERFIS_PRESET, PerfilPreset, usePermissions } from "@/hooks/usePermissions";
 
 const MOD_LABEL: Record<Modulo, string> = {
-  solicitacoes: "Solicitações", cotacoes: "Cotações", ordens: "Ordens de Compra",
+  dashboard: "Dashboard", solicitacoes: "Solicitações", cotacoes: "Cotações", ordens: "Ordens de Compra",
   financeiro: "Financeiro / Fluxo", obras: "Obras", fornecedores: "Fornecedores", insumos: "Insumos",
+  usuarios: "Usuários", relatorios: "Relatórios",
 };
 
 export default function Usuarios() {
@@ -84,11 +85,30 @@ export default function Usuarios() {
                 <Input name="password" type="password" minLength={6} required={!editing} />
               </div>
               <div>
-                <Label>Perfil</Label>
+                <Label>Perfil padrão</Label>
+                <Select value="personalizado" onValueChange={(v: PerfilPreset) => {
+                  if (v === "personalizado") return;
+                  const preset = PERFIS_PRESET[v];
+                  setRole(preset.role);
+                  setSelMods(preset.modulos);
+                }}>
+                  <SelectTrigger><SelectValue placeholder="Aplicar um perfil pré-definido" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="administrador">Administrador (todos os módulos)</SelectItem>
+                    <SelectItem value="compras">Compras</SelectItem>
+                    <SelectItem value="financeiro">Financeiro</SelectItem>
+                    <SelectItem value="engenharia">Engenharia</SelectItem>
+                    <SelectItem value="personalizado">Personalizado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground mt-1">Aplica um preset — depois você pode ajustar os módulos individualmente.</p>
+              </div>
+              <div>
+                <Label>Nível de acesso</Label>
                 <Select value={role} onValueChange={(v: any) => setRole(v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Administrador</SelectItem>
+                    <SelectItem value="admin">Administrador (acesso total)</SelectItem>
                     <SelectItem value="usuario">Usuário comum</SelectItem>
                   </SelectContent>
                 </Select>
@@ -96,7 +116,7 @@ export default function Usuarios() {
               {role === "usuario" && (
                 <div>
                   <Label className="mb-2 block">Módulos liberados</Label>
-                  <div className="grid grid-cols-2 gap-2 p-3 border rounded-md">
+                  <div className="grid grid-cols-2 gap-2 p-3 border rounded-md max-h-64 overflow-y-auto">
                     {ALL_MODULOS.map(m => (
                       <label key={m} className="flex items-center gap-2 text-sm cursor-pointer">
                         <Checkbox checked={selMods.includes(m)} onCheckedChange={(v) => {
