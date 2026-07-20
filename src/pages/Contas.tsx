@@ -239,7 +239,6 @@ function FormComOC({ onSaved }: { onSaved: () => void }) {
     (async () => {
       const { data } = await supabase.from("ordens_compra")
         .select("id, numero, total, fornecedor_id, obra_id, centro_custo_id, tipo_compra, faturamento_direto, prazo_entrega, condicao_pagamento, fornecedores(nome)")
-        .eq("faturamento_direto", true)
         .order("numero", { ascending: false });
       setOcs(data || []);
     })();
