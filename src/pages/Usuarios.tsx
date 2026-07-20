@@ -15,8 +15,9 @@ import { toast } from "sonner";
 import { ALL_MODULOS, Modulo, usePermissions } from "@/hooks/usePermissions";
 
 const MOD_LABEL: Record<Modulo, string> = {
-  solicitacoes: "Solicitações", cotacoes: "Cotações", ordens: "Ordens de Compra",
+  dashboard: "Dashboard", solicitacoes: "Solicitações", cotacoes: "Cotações", ordens: "Ordens de Compra",
   financeiro: "Financeiro / Fluxo", obras: "Obras", fornecedores: "Fornecedores", insumos: "Insumos",
+  usuarios: "Usuários", relatorios: "Relatórios",
 };
 
 export default function Usuarios() {
