@@ -144,7 +144,9 @@ export default function Cotacoes() {
     });
     setEditingId(cot.id);
     setSelSols(sols);
-    setNForn(Math.max(2, fornsState.length));
+    setParaContratacao(!!cot.para_contratacao);
+    setTipoCompra(cot.tipo_compra || "material");
+    setNForn(cot.para_contratacao ? 1 : Math.max(2, fornsState.length));
     setForns(fornsState.length ? fornsState : [{}, {}]);
     setPrecos(precosMap);
     setUsaEndObra(cot.usa_endereco_obra ?? true);
@@ -155,6 +157,8 @@ export default function Cotacoes() {
   const onCreate = async () => {
     if (selSols.length === 0) { toast.error("Selecione ao menos 1 solicitação"); return; }
     if (consolidatedItems.length === 0) { toast.error("Sem itens"); return; }
+    if (paraContratacao && forns.length !== 1) { toast.error("Cotação para contratação exige exatamente 1 fornecedor"); return; }
+    if (!paraContratacao && (forns.length < 2 || forns.length > 8)) { toast.error("Informe de 2 a 8 fornecedores"); return; }
     if (forns.some(f => !f.fornecedor_id && !f.nome_avulso)) { toast.error("Preencha todos os fornecedores"); return; }
 
     const obraId = solicitacoes.find(x => x.id === selSols[0])?.obra_id;
@@ -173,14 +177,18 @@ export default function Cotacoes() {
         obra_id: obraId,
         usa_endereco_obra: usaEndObra,
         endereco_entrega: usaEndObra ? null : (endEntrega || null),
+        para_contratacao: paraContratacao,
+        tipo_compra: tipoCompra,
         updated_at: new Date().toISOString(),
-      }).eq("id", editingId);
+      } as any).eq("id", editingId);
     } else {
       const { data: cot, error } = await supabase.from("cotacoes").insert({
         obra_id: obraId, status: "aberta", criado_por: user?.id,
         usa_endereco_obra: usaEndObra,
         endereco_entrega: usaEndObra ? null : (endEntrega || null),
-      }).select("id").single();
+        para_contratacao: paraContratacao,
+        tipo_compra: tipoCompra,
+      } as any).select("id").single();
       if (error || !cot) { toast.error(error?.message || "Erro"); return; }
       cotId = cot.id;
     }
