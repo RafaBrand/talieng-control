@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 const STATUS = ["aberta", "em_cotacao"];
 const STATUS_LABEL: Record<string, string> = { aberta: "Aberta", em_cotacao: "Em Cotação" };
-const URG = ["baixa", "normal", "alta", "urgente"];
+const TIPO_LABEL: Record<string, string> = { material: "Material", mao_de_obra: "Mão de Obra" };
 
 type ItemRow = { insumo_id: string | null; item: string; quantidade: string; unidade: string; observacao: string };
 const emptyRow = (): ItemRow => ({ insumo_id: null, item: "", quantidade: "1", unidade: "", observacao: "" });
@@ -33,12 +34,14 @@ export default function Solicitacoes() {
   const [rows, setRows] = useState<ItemRow[]>([emptyRow()]);
   const [obraSel, setObraSel] = useState<string>("");
   const [ccId, setCcId] = useState<string>("");
+  const [tipoCompra, setTipoCompra] = useState<"material" | "mao_de_obra">("material");
+  const [prazoEsperado, setPrazoEsperado] = useState<string>("");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const [q, setQ] = useState("");
   const [fObra, setFObra] = useState<string>("all");
   const [fStatus, setFStatus] = useState<string>("all");
-  const [fUrg, setFUrg] = useState<string>("all");
+  const [fTipo, setFTipo] = useState<string>("all");
 
   const load = async () => {
     const [{ data }, { data: o }, { data: ins }] = await Promise.all([
@@ -50,20 +53,26 @@ export default function Solicitacoes() {
   };
   useEffect(() => { load(); }, []);
 
+  const resetForm = () => {
+    setRows([emptyRow()]); setObraSel(""); setCcId(""); setTipoCompra("material"); setPrazoEsperado("");
+  };
+
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     if (!obraSel) { toast.error("Selecione a obra"); return; }
     if (!ccId) { toast.error("Selecione o centro de custo"); return; }
+    if (!prazoEsperado) { toast.error("Informe o prazo de entrega esperado"); return; }
     const validRows = rows.filter(r => r.item.trim());
     if (validRows.length === 0) { toast.error("Adicione ao menos um item"); return; }
     const { data: sol, error } = await supabase.from("solicitacoes_compra").insert({
       obra_id: obraSel,
       centro_custo_id: ccId,
       titulo: String(fd.get("titulo") || "") || null,
-      urgencia: String(fd.get("urgencia")),
+      tipo_compra: tipoCompra,
+      prazo_entrega_esperado: prazoEsperado,
       observacao: String(fd.get("observacao") || "") || null,
-    }).select("id, numero").single();
+    } as any).select("id, numero").single();
     if (error || !sol) { toast.error(error?.message || "Erro"); return; }
     const { error: e2 } = await supabase.from("solicitacao_itens").insert(
       validRows.map(r => ({
@@ -76,7 +85,7 @@ export default function Solicitacoes() {
       }))
     );
     if (e2) { toast.error(e2.message); return; }
-    toast.success(`SC ${String(sol.numero).padStart(2, "0")} criada`); setOpen(false); setRows([emptyRow()]); setObraSel(""); setCcId(""); load();
+    toast.success(`SC ${String(sol.numero).padStart(2, "0")} criada`); setOpen(false); resetForm(); load();
   };
 
   const remove = async (id: string) => {
@@ -89,7 +98,7 @@ export default function Solicitacoes() {
     return items.filter(s => {
       if (fObra !== "all" && s.obra_id !== fObra) return false;
       if (fStatus !== "all" && s.status !== fStatus) return false;
-      if (fUrg !== "all" && s.urgencia !== fUrg) return false;
+      if (fTipo !== "all" && s.tipo_compra !== fTipo) return false;
       if (!term) return true;
       const inNum = String(s.numero || "").includes(term);
       const inTitle = (s.titulo || "").toLowerCase().includes(term);
@@ -97,17 +106,33 @@ export default function Solicitacoes() {
       const inItems = (s.solicitacao_itens || []).some((it: any) => (it.item || "").toLowerCase().includes(term));
       return inNum || inTitle || inObra || inItems;
     });
-  }, [items, q, fObra, fStatus, fUrg]);
+  }, [items, q, fObra, fStatus, fTipo]);
 
   return (
     <div>
       <PageHeader title="Solicitações de Compra" description="Pedidos de materiais e serviços por obra" action={
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setRows([emptyRow()]); setObraSel(""); setCcId(""); } }}>
+        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Nova</Button></DialogTrigger>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>Nova solicitação</DialogTitle></DialogHeader>
             <form onSubmit={onSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <Label>Tipo da Solicitação *</Label>
+                  <Select value={tipoCompra} onValueChange={(v: any) => setTipoCompra(v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="material">Material</SelectItem>
+                      <SelectItem value="mao_de_obra">Mão de Obra</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Prazo de Entrega Esperado *</Label>
+                  <Input type="date" value={prazoEsperado} onChange={e => setPrazoEsperado(e.target.value)} required />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <Label>Obra *</Label>
                   <Select value={obraSel} onValueChange={(v) => { setObraSel(v); setCcId(""); }} required>
@@ -119,16 +144,8 @@ export default function Solicitacoes() {
                   <Label>Centro de Custo *</Label>
                   <CentroCustoSelect value={ccId} onValueChange={setCcId} obraId={obraSel || null} required />
                 </div>
-                <div>
-                  <Label>Urgência</Label>
-                  <Select name="urgencia" defaultValue="normal">
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{URG.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
               </div>
               <div><Label>Título / referência</Label><Input name="titulo" placeholder="Ex: Materiais hidráulicos lote 1" /></div>
-
 
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -186,18 +203,22 @@ export default function Solicitacoes() {
             <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent><SelectItem value="all">Todos status</SelectItem>{STATUS.map(s => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}</SelectContent>
           </Select>
-          <Select value={fUrg} onValueChange={setFUrg}>
-            <SelectTrigger><SelectValue placeholder="Urgência" /></SelectTrigger>
-            <SelectContent><SelectItem value="all">Toda urgência</SelectItem>{URG.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+          <Select value={fTipo} onValueChange={setFTipo}>
+            <SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos tipos</SelectItem>
+              <SelectItem value="material">Material</SelectItem>
+              <SelectItem value="mao_de_obra">Mão de Obra</SelectItem>
+            </SelectContent>
           </Select>
         </div>
       </Card>
 
       <Card className="shadow-card">
         <Table>
-          <TableHeader><TableRow><TableHead className="w-8"></TableHead><TableHead>Nº</TableHead><TableHead>Título</TableHead><TableHead>Obra</TableHead><TableHead>Itens</TableHead><TableHead>Urgência</TableHead><TableHead>Status</TableHead><TableHead>Data</TableHead><TableHead className="w-16"></TableHead></TableRow></TableHeader>
+          <TableHeader><TableRow><TableHead className="w-8"></TableHead><TableHead>Nº</TableHead><TableHead>Título</TableHead><TableHead>Obra</TableHead><TableHead>Tipo</TableHead><TableHead>Itens</TableHead><TableHead>Prazo</TableHead><TableHead>Status</TableHead><TableHead>Data</TableHead><TableHead className="w-16"></TableHead></TableRow></TableHeader>
           <TableBody>
-            {filtered.length === 0 && <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">Nenhuma solicitação</TableCell></TableRow>}
+            {filtered.length === 0 && <TableRow><TableCell colSpan={10} className="text-center text-muted-foreground py-8">Nenhuma solicitação</TableCell></TableRow>}
             {filtered.map(s => {
               const isOpen = !!expanded[s.id];
               const its = s.solicitacao_itens || [];
@@ -212,8 +233,9 @@ export default function Solicitacoes() {
                     <TableCell className="font-mono text-sm font-bold text-primary">SC {String(s.numero || 0).padStart(2, "0")}</TableCell>
                     <TableCell className="font-medium">{s.titulo || "—"}</TableCell>
                     <TableCell>{s.obras?.nome || "—"}</TableCell>
+                    <TableCell><Badge variant={s.tipo_compra === "mao_de_obra" ? "secondary" : "default"}>{TIPO_LABEL[s.tipo_compra] || "—"}</Badge></TableCell>
                     <TableCell>{its.length}</TableCell>
-                    <TableCell><StatusBadge status={s.urgencia} /></TableCell>
+                    <TableCell>{fmtDate(s.prazo_entrega_esperado)}</TableCell>
                     <TableCell><StatusBadge status={STATUS_LABEL[s.status] || s.status} /></TableCell>
                     <TableCell>{fmtDate(s.created_at?.slice(0, 10))}</TableCell>
                     <TableCell>
@@ -222,7 +244,7 @@ export default function Solicitacoes() {
                   </TableRow>
                   {isOpen && (
                     <TableRow key={s.id + "-d"} className="bg-muted/30">
-                      <TableCell colSpan={9}>
+                      <TableCell colSpan={10}>
                         <div className="p-2">
                           {its.length === 0 ? <p className="text-sm text-muted-foreground">Sem itens</p> : (
                             <table className="w-full text-sm">
