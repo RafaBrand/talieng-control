@@ -84,43 +84,58 @@ export type Database = {
       }
       contas_pagar: {
         Row: {
+          boleto_path: string | null
+          categoria_conta: string | null
           centro_custo_id: string | null
           created_at: string
           data_pagamento: string | null
           descricao: string
           fornecedor_id: string | null
           id: string
+          modo_lancamento: string
+          nota_fiscal_path: string | null
           obra_id: string | null
           ordem_compra_id: string | null
           status: string
+          tipo_compra: Database["public"]["Enums"]["tipo_compra"] | null
           updated_at: string
           valor: number
           vencimento: string
         }
         Insert: {
+          boleto_path?: string | null
+          categoria_conta?: string | null
           centro_custo_id?: string | null
           created_at?: string
           data_pagamento?: string | null
           descricao: string
           fornecedor_id?: string | null
           id?: string
+          modo_lancamento?: string
+          nota_fiscal_path?: string | null
           obra_id?: string | null
           ordem_compra_id?: string | null
           status?: string
+          tipo_compra?: Database["public"]["Enums"]["tipo_compra"] | null
           updated_at?: string
           valor: number
           vencimento: string
         }
         Update: {
+          boleto_path?: string | null
+          categoria_conta?: string | null
           centro_custo_id?: string | null
           created_at?: string
           data_pagamento?: string | null
           descricao?: string
           fornecedor_id?: string | null
           id?: string
+          modo_lancamento?: string
+          nota_fiscal_path?: string | null
           obra_id?: string | null
           ordem_compra_id?: string | null
           status?: string
+          tipo_compra?: Database["public"]["Enums"]["tipo_compra"] | null
           updated_at?: string
           valor?: number
           vencimento?: string
@@ -245,6 +260,7 @@ export type Database = {
       }
       cotacao_envios: {
         Row: {
+          anexo_path: string | null
           canal: string
           cotacao_id: string
           created_at: string
@@ -260,6 +276,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          anexo_path?: string | null
           canal: string
           cotacao_id: string
           created_at?: string
@@ -275,6 +292,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          anexo_path?: string | null
           canal?: string
           cotacao_id?: string
           created_at?: string
@@ -400,20 +418,26 @@ export type Database = {
         Row: {
           cotacao_fornecedor_id: string
           cotacao_item_id: string
+          frete: number
           id: string
           preco_unitario: number
+          valor_com_desconto: number | null
         }
         Insert: {
           cotacao_fornecedor_id: string
           cotacao_item_id: string
+          frete?: number
           id?: string
           preco_unitario?: number
+          valor_com_desconto?: number | null
         }
         Update: {
           cotacao_fornecedor_id?: string
           cotacao_item_id?: string
+          frete?: number
           id?: string
           preco_unitario?: number
+          valor_com_desconto?: number | null
         }
         Relationships: [
           {
@@ -471,7 +495,9 @@ export type Database = {
           numero: number
           obra_id: string | null
           observacao: string | null
+          para_contratacao: boolean
           status: string
+          tipo_compra: Database["public"]["Enums"]["tipo_compra"]
           updated_at: string
           usa_endereco_obra: boolean
         }
@@ -483,7 +509,9 @@ export type Database = {
           numero?: number
           obra_id?: string | null
           observacao?: string | null
+          para_contratacao?: boolean
           status?: string
+          tipo_compra?: Database["public"]["Enums"]["tipo_compra"]
           updated_at?: string
           usa_endereco_obra?: boolean
         }
@@ -495,7 +523,9 @@ export type Database = {
           numero?: number
           obra_id?: string | null
           observacao?: string | null
+          para_contratacao?: boolean
           status?: string
+          tipo_compra?: Database["public"]["Enums"]["tipo_compra"]
           updated_at?: string
           usa_endereco_obra?: boolean
         }
@@ -831,6 +861,7 @@ export type Database = {
           data_emissao: string | null
           desconto: number | null
           detalhe_pagamento: string | null
+          faturamento_direto: boolean
           forma_pagamento: string | null
           fornecedor_id: string | null
           frete_tipo: string | null
@@ -847,6 +878,7 @@ export type Database = {
           solicitacao_id: string | null
           solicitacao_item_id: string | null
           status: string
+          tipo_compra: Database["public"]["Enums"]["tipo_compra"]
           total: number
           updated_at: string
         }
@@ -866,6 +898,7 @@ export type Database = {
           data_emissao?: string | null
           desconto?: number | null
           detalhe_pagamento?: string | null
+          faturamento_direto?: boolean
           forma_pagamento?: string | null
           fornecedor_id?: string | null
           frete_tipo?: string | null
@@ -882,6 +915,7 @@ export type Database = {
           solicitacao_id?: string | null
           solicitacao_item_id?: string | null
           status?: string
+          tipo_compra?: Database["public"]["Enums"]["tipo_compra"]
           total?: number
           updated_at?: string
         }
@@ -901,6 +935,7 @@ export type Database = {
           data_emissao?: string | null
           desconto?: number | null
           detalhe_pagamento?: string | null
+          faturamento_direto?: boolean
           forma_pagamento?: string | null
           fornecedor_id?: string | null
           frete_tipo?: string | null
@@ -917,6 +952,7 @@ export type Database = {
           solicitacao_id?: string | null
           solicitacao_item_id?: string | null
           status?: string
+          tipo_compra?: Database["public"]["Enums"]["tipo_compra"]
           total?: number
           updated_at?: string
         }
@@ -1058,8 +1094,10 @@ export type Database = {
           numero: number
           obra_id: string
           observacao: string | null
+          prazo_entrega_esperado: string | null
           solicitante_id: string | null
           status: string
+          tipo_compra: Database["public"]["Enums"]["tipo_compra"]
           titulo: string | null
           updated_at: string
           urgencia: string
@@ -1071,8 +1109,10 @@ export type Database = {
           numero?: number
           obra_id: string
           observacao?: string | null
+          prazo_entrega_esperado?: string | null
           solicitante_id?: string | null
           status?: string
+          tipo_compra?: Database["public"]["Enums"]["tipo_compra"]
           titulo?: string | null
           updated_at?: string
           urgencia?: string
@@ -1084,8 +1124,10 @@ export type Database = {
           numero?: number
           obra_id?: string
           observacao?: string | null
+          prazo_entrega_esperado?: string | null
           solicitante_id?: string | null
           status?: string
+          tipo_compra?: Database["public"]["Enums"]["tipo_compra"]
           titulo?: string | null
           updated_at?: string
           urgencia?: string
@@ -1176,6 +1218,7 @@ export type Database = {
         | "insumos"
       app_role: "admin" | "usuario"
       centro_custo_tipo: "obra" | "administrativo" | "personalizado"
+      tipo_compra: "material" | "mao_de_obra"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1314,6 +1357,7 @@ export const Constants = {
       ],
       app_role: ["admin", "usuario"],
       centro_custo_tipo: ["obra", "administrativo", "personalizado"],
+      tipo_compra: ["material", "mao_de_obra"],
     },
   },
 } as const
