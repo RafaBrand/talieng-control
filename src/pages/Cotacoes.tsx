@@ -340,45 +340,32 @@ export default function Cotacoes() {
 
 
                   <div>
-                    <Label className="mb-2 block">3. Dados dos fornecedores e preços</Label>
-                    <div className="overflow-x-auto border rounded-md">
-                      <table className="w-full text-sm">
-                        <thead className="bg-muted">
-                          <tr>
-                            <th className="text-left p-2 sticky left-0 bg-muted">Item</th>
-                            <th className="text-left p-2">Qtd</th>
-                            {forns.map((_, i) => (
-                              <th key={i} className="text-left p-2 min-w-48">
-                                <div className="space-y-1">
-                                  <Select value={forns[i].fornecedor_id || ""} onValueChange={(v) => { const c = [...forns]; c[i].fornecedor_id = v; c[i].nome_avulso = ""; setForns(c); }}>
-                                    <SelectTrigger className="h-8"><SelectValue placeholder="Fornecedor cadastrado" /></SelectTrigger>
-                                    <SelectContent>{fornecedores.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
-                                  </Select>
-                                  <Input className="h-7" placeholder="ou nome avulso" value={forns[i].nome_avulso || ""} onChange={e => { const c = [...forns]; c[i].nome_avulso = e.target.value; c[i].fornecedor_id = ""; setForns(c); }} />
-                                  <Input className="h-7" placeholder="Prazo entrega" value={forns[i].prazo_entrega || ""} onChange={e => { const c = [...forns]; c[i].prazo_entrega = e.target.value; setForns(c); }} />
-                                  <Input className="h-7" placeholder="Cond. pagto (ex: 30, 30/60)" value={forns[i].condicao_pagamento || ""} onChange={e => { const c = [...forns]; c[i].condicao_pagamento = e.target.value; setForns(c); }} />
-                                </div>
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {consolidatedItems.map(it => (
-                            <tr key={it.id} className="border-t">
-                              <td className="p-2 sticky left-0 bg-background">{it.item}</td>
-                              <td className="p-2">{it.quantidade} {it.unidade}</td>
-                              {forns.map((_, i) => (
-                                <td key={i} className="p-1">
-                                  <Input type="number" step="0.01" placeholder="0.00" className="h-8"
-                                    value={precos[it.id]?.[i] || ""}
-                                    onChange={e => setPrecos({ ...precos, [it.id]: { ...(precos[it.id] || {}), [i]: e.target.value } })} />
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <Label className="mb-2 block">3. Fornecedores para cotação</Label>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Cadastre os fornecedores que serão cotados. Os valores (unitário, desconto e frete) serão informados na tela de <strong>Equalização</strong>.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {forns.map((_, i) => (
+                        <div key={i} className="border rounded-md p-3 space-y-2 bg-muted/30">
+                          <div className="text-xs font-semibold text-muted-foreground">Fornecedor {i + 1}</div>
+                          <Select value={forns[i].fornecedor_id || ""} onValueChange={(v) => { const c = [...forns]; c[i].fornecedor_id = v; c[i].nome_avulso = ""; setForns(c); }}>
+                            <SelectTrigger className="h-8"><SelectValue placeholder="Selecionar fornecedor cadastrado" /></SelectTrigger>
+                            <SelectContent>{fornecedores.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
+                          </Select>
+                          <Input className="h-8" placeholder="ou nome avulso" value={forns[i].nome_avulso || ""} onChange={e => { const c = [...forns]; c[i].nome_avulso = e.target.value; c[i].fornecedor_id = ""; setForns(c); }} />
+                          <div className="grid grid-cols-2 gap-2">
+                            <Input className="h-8" placeholder="Prazo entrega" value={forns[i].prazo_entrega || ""} onChange={e => { const c = [...forns]; c[i].prazo_entrega = e.target.value; setForns(c); }} />
+                            <Input className="h-8" placeholder="Cond. pagto" value={forns[i].condicao_pagamento || ""} onChange={e => { const c = [...forns]; c[i].condicao_pagamento = e.target.value; setForns(c); }} />
+                          </div>
+                        </div>
+                      ))}
                     </div>
+                    <details className="mt-3 text-xs">
+                      <summary className="cursor-pointer text-muted-foreground">Ver itens desta cotação ({consolidatedItems.length})</summary>
+                      <ul className="mt-2 space-y-1 pl-4 list-disc">
+                        {consolidatedItems.map(it => <li key={it.id}>{it.item} — {it.quantidade} {it.unidade}</li>)}
+                      </ul>
+                    </details>
                   </div>
 
                   <div>
