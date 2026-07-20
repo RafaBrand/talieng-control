@@ -116,9 +116,9 @@ export default function CotacaoEqualizacao() {
     forns.forEach(f => {
       const t = totalGeralForn(f.id);
       if (t <= 0) return;
-      if (!best || t < best.total) best = { fId: f.id, total: t };
+      if (!best || t < (best as { fId: string; total: number }).total) best = { fId: f.id, total: t };
     });
-    return best;
+    return best as { fId: string; total: number } | null;
   }, [forns, precos, freteForn]);
 
   const salvar = async () => {
