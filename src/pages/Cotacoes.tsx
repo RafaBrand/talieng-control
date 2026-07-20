@@ -92,7 +92,7 @@ export default function Cotacoes() {
   };
   useEffect(() => { load(); }, []);
 
-  // when sols selected, build consolidated list
+  // when sols selected, build consolidated list + inherit tipo_compra
   useEffect(() => {
     const list: any[] = [];
     selSols.forEach(sid => {
@@ -100,16 +100,28 @@ export default function Cotacoes() {
       (sol?.solicitacao_itens || []).forEach((it: any) => list.push({ ...it, _solicitacao_id: sid, _obra_id: sol.obra_id }));
     });
     setConsolidatedItems(list);
-  }, [selSols, solicitacoes]);
+    if (selSols.length && !editingId) {
+      const primeiro = solicitacoes.find(x => x.id === selSols[0]);
+      if (primeiro?.tipo_compra) setTipoCompra(primeiro.tipo_compra);
+    }
+  }, [selSols, solicitacoes, editingId]);
 
   useEffect(() => {
     setForns(prev => Array.from({ length: nForn }).map((_, i) => prev[i] || {}));
   }, [nForn]);
 
+  // Se marcar "para contratação", força apenas 1 fornecedor
+  useEffect(() => {
+    if (paraContratacao) setNForn(1);
+    else if (nForn < 2) setNForn(2);
+    // eslint-disable-next-line
+  }, [paraContratacao]);
+
   const reset = () => {
     setSelSols([]); setNForn(2); setForns([{}, {}]); setPrecos({}); setConsolidatedItems([]);
     setEditingId(null);
     setUsaEndObra(true); setEndEntrega("");
+    setParaContratacao(false); setTipoCompra("material");
   };
 
   const openEdit = (cot: any) => {
