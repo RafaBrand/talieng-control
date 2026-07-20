@@ -164,10 +164,10 @@ export default function CotacaoEqualizacao() {
       await supabase.from("cotacao_envios").update({ anexo_path: path } as any).eq("id", envioId);
     } else {
       await supabase.from("cotacao_envios").insert({
-        cotacao_id: id, fornecedor_id: forn?.fornecedor_id || null,
+        cotacao_id: id!, fornecedor_id: forn?.fornecedor_id || null,
         fornecedor_nome: forn?.fornecedores?.nome || forn?.nome_avulso || null,
         canal: "email", status: "enviado", anexo_path: path,
-      });
+      } as any);
     }
     toast.success("Anexo enviado");
     await load();
