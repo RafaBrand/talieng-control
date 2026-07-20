@@ -54,6 +54,8 @@ export default function OrdemForm() {
   const [prazoEntrega, setPrazoEntrega] = useState("");
   const [condicaoPagto, setCondicaoPagto] = useState("");
   const [numero, setNumero] = useState<number | null>(null);
+  const [tipoCompra, setTipoCompra] = useState<"material" | "mao_de_obra">("material");
+  const [faturamentoDireto, setFaturamentoDireto] = useState(false);
   const [itens, setItens] = useState<Item[]>([{ descricao: "", quantidade: 1, unidade: "", preco_unitario: 0 }]);
 
   // CNPJ search
