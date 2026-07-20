@@ -85,11 +85,30 @@ export default function Usuarios() {
                 <Input name="password" type="password" minLength={6} required={!editing} />
               </div>
               <div>
-                <Label>Perfil</Label>
+                <Label>Perfil padrão</Label>
+                <Select value="personalizado" onValueChange={(v: PerfilPreset) => {
+                  if (v === "personalizado") return;
+                  const preset = PERFIS_PRESET[v];
+                  setRole(preset.role);
+                  setSelMods(preset.modulos);
+                }}>
+                  <SelectTrigger><SelectValue placeholder="Aplicar um perfil pré-definido" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="administrador">Administrador (todos os módulos)</SelectItem>
+                    <SelectItem value="compras">Compras</SelectItem>
+                    <SelectItem value="financeiro">Financeiro</SelectItem>
+                    <SelectItem value="engenharia">Engenharia</SelectItem>
+                    <SelectItem value="personalizado">Personalizado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground mt-1">Aplica um preset — depois você pode ajustar os módulos individualmente.</p>
+              </div>
+              <div>
+                <Label>Nível de acesso</Label>
                 <Select value={role} onValueChange={(v: any) => setRole(v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Administrador</SelectItem>
+                    <SelectItem value="admin">Administrador (acesso total)</SelectItem>
                     <SelectItem value="usuario">Usuário comum</SelectItem>
                   </SelectContent>
                 </Select>
@@ -97,7 +116,7 @@ export default function Usuarios() {
               {role === "usuario" && (
                 <div>
                   <Label className="mb-2 block">Módulos liberados</Label>
-                  <div className="grid grid-cols-2 gap-2 p-3 border rounded-md">
+                  <div className="grid grid-cols-2 gap-2 p-3 border rounded-md max-h-64 overflow-y-auto">
                     {ALL_MODULOS.map(m => (
                       <label key={m} className="flex items-center gap-2 text-sm cursor-pointer">
                         <Checkbox checked={selMods.includes(m)} onCheckedChange={(v) => {
