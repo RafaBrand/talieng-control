@@ -41,6 +41,8 @@ export default function Cotacoes() {
   const [consolidatedItems, setConsolidatedItems] = useState<any[]>([]);
   const [usaEndObra, setUsaEndObra] = useState(true);
   const [endEntrega, setEndEntrega] = useState("");
+  const [paraContratacao, setParaContratacao] = useState(false);
+  const [tipoCompra, setTipoCompra] = useState<"material" | "mao_de_obra">("material");
 
   const load = async () => {
     setLoading(true);

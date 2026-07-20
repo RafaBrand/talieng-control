@@ -14,6 +14,7 @@ import Fornecedores from "./pages/Fornecedores";
 import Categorias from "./pages/Categorias";
 import Solicitacoes from "./pages/Solicitacoes";
 import Cotacoes from "./pages/Cotacoes";
+import CotacaoEqualizacao from "./pages/CotacaoEqualizacao";
 import Ordens from "./pages/Ordens";
 import OrdemForm from "./pages/OrdemForm";
 import Insumos from "./pages/Insumos";
@@ -42,6 +43,7 @@ export default function App() {
                 <Route path="/categorias" element={<RequireModule adminOnly><Categorias /></RequireModule>} />
                 <Route path="/solicitacoes" element={<RequireModule modulo="solicitacoes"><Solicitacoes /></RequireModule>} />
                 <Route path="/cotacoes" element={<RequireModule modulo="cotacoes"><Cotacoes /></RequireModule>} />
+                <Route path="/cotacoes/:id/equalizacao" element={<RequireModule modulo="cotacoes"><CotacaoEqualizacao /></RequireModule>} />
                 <Route path="/ordens" element={<RequireModule modulo="ordens"><Ordens /></RequireModule>} />
                 <Route path="/ordens/nova" element={<RequireModule modulo="ordens"><OrdemForm /></RequireModule>} />
                 <Route path="/ordens/:id/editar" element={<RequireModule modulo="ordens"><OrdemForm /></RequireModule>} />
