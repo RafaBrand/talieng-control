@@ -12,7 +12,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Power } from "lucide-react";
 import { toast } from "sonner";
-import { ALL_MODULOS, Modulo, usePermissions } from "@/hooks/usePermissions";
+import { ALL_MODULOS, Modulo, PERFIS_PRESET, PerfilPreset, usePermissions } from "@/hooks/usePermissions";
 
 const MOD_LABEL: Record<Modulo, string> = {
   dashboard: "Dashboard", solicitacoes: "Solicitações", cotacoes: "Cotações", ordens: "Ordens de Compra",
