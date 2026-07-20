@@ -87,6 +87,8 @@ export default function OrdemForm() {
     setBanco(o.banco || ""); setAgencia(o.agencia || ""); setConta(o.conta || "");
     setObservacao(o.observacao || ""); setPrazoEntrega(o.prazo_entrega || "");
     setCondicaoPagto(o.condicao_pagamento || "");
+    setTipoCompra((o.tipo_compra as any) || "material");
+    setFaturamentoDireto(!!o.faturamento_direto);
     if (o.fornecedor_id) {
       const { data: f } = await supabase.from("fornecedores").select("*").eq("id", o.fornecedor_id).maybeSingle();
       if (f) { setFornecedorId(f.id); setForn(f); setCnpjBusca(f.cnpj || ""); }
@@ -141,6 +143,7 @@ export default function OrdemForm() {
       if (cc?.id) setCentroCustoId(cc.id);
     }
     setCotacaoNumero(cot.numero ?? null);
+    if (cot.tipo_compra) setTipoCompra(cot.tipo_compra);
     let cotForn: any = (cot.cotacao_fornecedores || []).find((f: any) => f.id === fornCotId) || (cot.cotacao_fornecedores || [])[0];
     if (!cotForn) { toast.error("Cotação sem fornecedor vinculado"); return; }
     if (cotForn?.fornecedores) {
@@ -185,6 +188,8 @@ export default function OrdemForm() {
       detalhe_pagamento: detalhePagamento || null, banco: banco || null, agencia: agencia || null, conta: conta || null,
       observacao: observacao || null, prazo_entrega: prazoEntrega || null, condicao_pagamento: condicaoPagto || null,
       preco_unitario: subtotal, quantidade: 1,
+      tipo_compra: tipoCompra,
+      faturamento_direto: faturamentoDireto,
     };
     const cotacaoId = new URLSearchParams(window.location.search).get("cotacao");
     if (!id && fromCotacao && cotacaoId) payload.cotacao_id = cotacaoId;
@@ -264,6 +269,17 @@ export default function OrdemForm() {
             </div>
             <div><Label>Contrato de empreiteiro</Label><Input value={contratoEmpr} onChange={e => setContratoEmpr(e.target.value)} /></div>
             <div><Label>C.E.I. da obra</Label><Input value={ceiObra} onChange={e => setCeiObra(e.target.value)} /></div>
+            <div>
+              <Label>Tipo (Material / Mão de Obra)</Label>
+              <Input value={tipoCompra === "mao_de_obra" ? "Mão de Obra" : "Material"} disabled={fromCotacao} onChange={() => {}} readOnly />
+              {fromCotacao && <p className="text-[10px] text-muted-foreground">Herdado da cotação</p>}
+            </div>
+            <div className="flex items-end">
+              <label className="flex items-center gap-2 text-sm border rounded-md p-2 cursor-pointer w-full">
+                <input type="checkbox" checked={faturamentoDireto} onChange={e => setFaturamentoDireto(e.target.checked)} />
+                <span>Faturamento Direto</span>
+              </label>
+            </div>
           </div>
         </Card>
       </div>

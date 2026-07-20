@@ -162,14 +162,16 @@ export default function Ordens() {
 
       <Card className="shadow-card">
         <Table>
-          <TableHeader><TableRow><TableHead>Nº</TableHead><TableHead>Fornecedor</TableHead><TableHead>Obra</TableHead><TableHead>Total</TableHead><TableHead>Criada em</TableHead><TableHead>Entrega</TableHead><TableHead>Status</TableHead><TableHead className="w-44"></TableHead></TableRow></TableHeader>
+          <TableHeader><TableRow><TableHead>Nº</TableHead><TableHead>Fornecedor</TableHead><TableHead>Obra</TableHead><TableHead>Tipo</TableHead><TableHead>Fat. Direto</TableHead><TableHead>Total</TableHead><TableHead>Criada em</TableHead><TableHead>Entrega</TableHead><TableHead>Status</TableHead><TableHead className="w-44"></TableHead></TableRow></TableHeader>
           <TableBody>
-            {filtered.length === 0 && <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">Nenhuma ordem. Crie uma cotação aprovada e gere a OC a partir dela.</TableCell></TableRow>}
+            {filtered.length === 0 && <TableRow><TableCell colSpan={10} className="text-center text-muted-foreground py-8">Nenhuma ordem. Crie uma cotação aprovada e gere a OC a partir dela.</TableCell></TableRow>}
             {filtered.map(o => (
               <TableRow key={o.id}>
                 <TableCell className="font-mono text-sm font-bold text-primary">OC {String(o.numero).padStart(2, "0")}</TableCell>
                 <TableCell>{o.fornecedores?.nome || "—"}</TableCell>
                 <TableCell>{o.obras?.nome || "—"}</TableCell>
+                <TableCell className="text-xs">{o.tipo_compra === "mao_de_obra" ? "Mão de Obra" : "Material"}</TableCell>
+                <TableCell className="text-xs">{o.faturamento_direto ? "Sim" : "Não"}</TableCell>
                 <TableCell className="font-semibold">{brl(o.total)}</TableCell>
                 <TableCell>{fmtDate(o.created_at?.slice(0, 10))}</TableCell>
                 <TableCell>{fmtDate(o.prazo_entrega)}</TableCell>
