@@ -448,7 +448,8 @@ export default function Cotacoes() {
                     </Select>
                     <Button size="icon" variant="ghost" title="Editar" onClick={() => openEdit(c)}><Pencil className="h-4 w-4" /></Button>
                     <Button size="icon" variant="ghost" title="Enviar a fornecedores" onClick={() => setSendTo(c)}><Send className="h-4 w-4" /></Button>
-                    <Button size="icon" variant="ghost" title="Equalizar" onClick={() => setView(c)}><Eye className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" title="Equalização (planilha)" onClick={() => navigate(`/cotacoes/${c.id}/equalizacao`)}><FileDown className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" title="Equalizar (rápida)" onClick={() => setView(c)}><Eye className="h-4 w-4" /></Button>
                     <Button size="icon" variant="ghost" onClick={() => remove(c.id)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 </TableCell>
