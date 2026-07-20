@@ -329,6 +329,7 @@ export type Database = {
           condicao_pagamento: string | null
           cotacao_id: string
           fornecedor_id: string | null
+          frete_total: number
           id: string
           nome_avulso: string | null
           ordem: number
@@ -338,6 +339,7 @@ export type Database = {
           condicao_pagamento?: string | null
           cotacao_id: string
           fornecedor_id?: string | null
+          frete_total?: number
           id?: string
           nome_avulso?: string | null
           ordem?: number
@@ -347,6 +349,7 @@ export type Database = {
           condicao_pagamento?: string | null
           cotacao_id?: string
           fornecedor_id?: string | null
+          frete_total?: number
           id?: string
           nome_avulso?: string | null
           ordem?: number
@@ -1216,6 +1219,9 @@ export type Database = {
         | "obras"
         | "fornecedores"
         | "insumos"
+        | "usuarios"
+        | "relatorios"
+        | "dashboard"
       app_role: "admin" | "usuario"
       centro_custo_tipo: "obra" | "administrativo" | "personalizado"
       tipo_compra: "material" | "mao_de_obra"
@@ -1354,6 +1360,9 @@ export const Constants = {
         "obras",
         "fornecedores",
         "insumos",
+        "usuarios",
+        "relatorios",
+        "dashboard",
       ],
       app_role: ["admin", "usuario"],
       centro_custo_tipo: ["obra", "administrativo", "personalizado"],
