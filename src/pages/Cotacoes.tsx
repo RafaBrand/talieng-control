@@ -41,6 +41,8 @@ export default function Cotacoes() {
   const [consolidatedItems, setConsolidatedItems] = useState<any[]>([]);
   const [usaEndObra, setUsaEndObra] = useState(true);
   const [endEntrega, setEndEntrega] = useState("");
+  const [paraContratacao, setParaContratacao] = useState(false);
+  const [tipoCompra, setTipoCompra] = useState<"material" | "mao_de_obra">("material");
 
   const load = async () => {
     setLoading(true);
@@ -90,7 +92,7 @@ export default function Cotacoes() {
   };
   useEffect(() => { load(); }, []);
 
-  // when sols selected, build consolidated list
+  // when sols selected, build consolidated list + inherit tipo_compra
   useEffect(() => {
     const list: any[] = [];
     selSols.forEach(sid => {
@@ -98,16 +100,28 @@ export default function Cotacoes() {
       (sol?.solicitacao_itens || []).forEach((it: any) => list.push({ ...it, _solicitacao_id: sid, _obra_id: sol.obra_id }));
     });
     setConsolidatedItems(list);
-  }, [selSols, solicitacoes]);
+    if (selSols.length && !editingId) {
+      const primeiro = solicitacoes.find(x => x.id === selSols[0]);
+      if (primeiro?.tipo_compra) setTipoCompra(primeiro.tipo_compra);
+    }
+  }, [selSols, solicitacoes, editingId]);
 
   useEffect(() => {
     setForns(prev => Array.from({ length: nForn }).map((_, i) => prev[i] || {}));
   }, [nForn]);
 
+  // Se marcar "para contratação", força apenas 1 fornecedor
+  useEffect(() => {
+    if (paraContratacao) setNForn(1);
+    else if (nForn < 2) setNForn(2);
+    // eslint-disable-next-line
+  }, [paraContratacao]);
+
   const reset = () => {
     setSelSols([]); setNForn(2); setForns([{}, {}]); setPrecos({}); setConsolidatedItems([]);
     setEditingId(null);
     setUsaEndObra(true); setEndEntrega("");
+    setParaContratacao(false); setTipoCompra("material");
   };
 
   const openEdit = (cot: any) => {
@@ -130,7 +144,9 @@ export default function Cotacoes() {
     });
     setEditingId(cot.id);
     setSelSols(sols);
-    setNForn(Math.max(2, fornsState.length));
+    setParaContratacao(!!cot.para_contratacao);
+    setTipoCompra(cot.tipo_compra || "material");
+    setNForn(cot.para_contratacao ? 1 : Math.max(2, fornsState.length));
     setForns(fornsState.length ? fornsState : [{}, {}]);
     setPrecos(precosMap);
     setUsaEndObra(cot.usa_endereco_obra ?? true);
@@ -141,6 +157,8 @@ export default function Cotacoes() {
   const onCreate = async () => {
     if (selSols.length === 0) { toast.error("Selecione ao menos 1 solicitação"); return; }
     if (consolidatedItems.length === 0) { toast.error("Sem itens"); return; }
+    if (paraContratacao && forns.length !== 1) { toast.error("Cotação para contratação exige exatamente 1 fornecedor"); return; }
+    if (!paraContratacao && (forns.length < 2 || forns.length > 8)) { toast.error("Informe de 2 a 8 fornecedores"); return; }
     if (forns.some(f => !f.fornecedor_id && !f.nome_avulso)) { toast.error("Preencha todos os fornecedores"); return; }
 
     const obraId = solicitacoes.find(x => x.id === selSols[0])?.obra_id;
@@ -159,14 +177,18 @@ export default function Cotacoes() {
         obra_id: obraId,
         usa_endereco_obra: usaEndObra,
         endereco_entrega: usaEndObra ? null : (endEntrega || null),
+        para_contratacao: paraContratacao,
+        tipo_compra: tipoCompra,
         updated_at: new Date().toISOString(),
-      }).eq("id", editingId);
+      } as any).eq("id", editingId);
     } else {
       const { data: cot, error } = await supabase.from("cotacoes").insert({
         obra_id: obraId, status: "aberta", criado_por: user?.id,
         usa_endereco_obra: usaEndObra,
         endereco_entrega: usaEndObra ? null : (endEntrega || null),
-      }).select("id").single();
+        para_contratacao: paraContratacao,
+        tipo_compra: tipoCompra,
+      } as any).select("id").single();
       if (error || !cot) { toast.error(error?.message || "Erro"); return; }
       cotId = cot.id;
     }
@@ -299,10 +321,23 @@ export default function Cotacoes() {
 
               {consolidatedItems.length > 0 && (
                 <>
-                  <div>
-                    <Label className="mb-2 block">2. Quantidade de fornecedores (2 a 5)</Label>
-                    <Input type="number" min={2} max={5} value={nForn} onChange={e => setNForn(Math.max(2, Math.min(5, Number(e.target.value) || 2)))} className="w-24" />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                    <div>
+                      <Label className="mb-2 block">Tipo (herdado da SC)</Label>
+                      <Input value={tipoCompra === "mao_de_obra" ? "Mão de Obra" : "Material"} disabled />
+                    </div>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer border rounded-md p-2">
+                      <Checkbox checked={paraContratacao} onCheckedChange={(v) => setParaContratacao(!!v)} />
+                      <span>Cotação para Contratação (1 fornecedor)</span>
+                    </label>
+                    <div>
+                      <Label className="mb-2 block">Nº de fornecedores {paraContratacao ? "(fixo em 1)" : "(2 a 8)"}</Label>
+                      <Input type="number" min={paraContratacao ? 1 : 2} max={paraContratacao ? 1 : 8} value={nForn}
+                        disabled={paraContratacao}
+                        onChange={e => setNForn(Math.max(paraContratacao ? 1 : 2, Math.min(paraContratacao ? 1 : 8, Number(e.target.value) || 2)))} className="w-24" />
+                    </div>
                   </div>
+
 
                   <div>
                     <Label className="mb-2 block">3. Dados dos fornecedores e preços</Label>
@@ -413,7 +448,8 @@ export default function Cotacoes() {
                     </Select>
                     <Button size="icon" variant="ghost" title="Editar" onClick={() => openEdit(c)}><Pencil className="h-4 w-4" /></Button>
                     <Button size="icon" variant="ghost" title="Enviar a fornecedores" onClick={() => setSendTo(c)}><Send className="h-4 w-4" /></Button>
-                    <Button size="icon" variant="ghost" title="Equalizar" onClick={() => setView(c)}><Eye className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" title="Equalização (planilha)" onClick={() => navigate(`/cotacoes/${c.id}/equalizacao`)}><FileDown className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" title="Equalizar (rápida)" onClick={() => setView(c)}><Eye className="h-4 w-4" /></Button>
                     <Button size="icon" variant="ghost" onClick={() => remove(c.id)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 </TableCell>

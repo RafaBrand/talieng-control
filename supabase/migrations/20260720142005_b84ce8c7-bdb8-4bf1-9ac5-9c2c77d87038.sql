@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.oc_gera_conta_pagar() FROM PUBLIC, anon, authenticated;

@@ -1,42 +1,129 @@
 ## Visão geral
 
-O projeto original é um SaaS de gestão de obras (Vite + React Router + Supabase) com 18 páginas em português, sistema de permissões por módulo, RBAC (admin/user), 11 migrações e integração com Supabase Auth + Edge Functions. Preciso portá-lo para o stack atual (TanStack Start v1 + Lovable Cloud), mantendo funcionalidades 1:1.
+Atualização estrutural do TaliControl para introduzir a classificação **Material / Mão de Obra** em todo o fluxo de compras, reformular Cotações com equalização dedicada, adicionar **Faturamento Direto** nas OCs e permitir Contas a Pagar avulsas (com/sem OC, integrais/parciais).
 
-Como é uma migração grande (~3.300 linhas só de páginas, além de hooks, integrações e componentes), vou executar em **fases sequenciais** — cada fase é uma entrega funcional e será feita em turnos separados.
+Mantém tudo o que já funciona hoje (permissões por módulo, geração automática de centro de custo por obra, sequências de numeração, RLS, storage `documentos`).
 
-## Fase 1 — Backend e fundação (este turno)
+---
 
-1. Ativar Lovable Cloud.
-2. Consolidar as 11 migrações do zip em uma única migração idempotente e aplicá-la (tabelas: `profiles`, `user_roles`, `obras`, `fornecedores`, `categorias`, `centros_custo`, `insumos`, `solicitacoes`, `cotacoes`, `ordens`, `ordem_itens`, `contas_pagar`, `contas_receber`, `documentos`, `configuracoes`, módulos de permissão, etc.), com RLS, policies, funções `has_role`/`is_admin`, triggers e GRANTs.
-3. Configurar auth (email/senha).
-4. Portar arquivos base: `src/integrations/supabase/types.ts` (regerado), hooks `useAuth`, `usePermissions`, componentes `AppLayout`, `AppSidebar`, `ProtectedRoute`, `RequireModule`, `PageHeader`, `StatusBadge`, `CentroCustoSelect`, `NavLink`.
-5. Estrutura de rotas TanStack: `_authenticated/route.tsx` (gate), `/auth` (login/signup), `/` (dashboard placeholder), `__root.tsx` com providers.
-6. Copiar `src/index.css` (design tokens) e componentes `ui/` do shadcn que faltarem.
+## 1. Banco de dados (migração única)
 
-Entrega da Fase 1: usuário consegue fazer login, ver sidebar com todos os módulos e navegar (páginas ainda vazias).
+Novo enum e colunas — nada é removido de forma destrutiva; campos legados ficam nullable para preservar histórico.
 
-## Fase 2 — Módulos operacionais
+- `create type public.tipo_compra as enum ('material','mao_de_obra');`
+- `solicitacoes_compra`:
+  - `tipo_compra tipo_compra not null default 'material'` (backfill = 'material')
+  - `prazo_entrega_esperado date` (obrigatório na UI a partir de agora)
+  - manter coluna `urgencia` no banco por compatibilidade, apenas removida da UI
+- `cotacoes`:
+  - `tipo_compra tipo_compra not null default 'material'`
+  - `para_contratacao boolean not null default false`
+- `cotacao_envios` (equalização por fornecedor/item já existe via `cotacao_precos`):
+  - garantir colunas `valor_unitario numeric`, `valor_com_desconto numeric`, `frete numeric` em `cotacao_precos` (adicionar as que faltarem)
+  - `cotacao_envios.anexo_path text` para PDF/imagem por fornecedor (usa bucket `documentos`)
+- `ordens_compra`:
+  - `tipo_compra tipo_compra not null default 'material'`
+  - `faturamento_direto boolean not null default false`
+- `contas_pagar`:
+  - `tipo_compra tipo_compra` (nullable — permite DAS/impostos sem tipo)
+  - `categoria_conta text check (categoria_conta in ('material','mao_de_obra','imposto')) `
+  - `modo_lancamento text check (modo_lancamento in ('integral','parcial','avulso')) default 'integral'`
+  - `nota_fiscal_path text`, `boleto_path text`
+- Trigger `oc_gera_conta_pagar`: passar a **só** criar Conta a Pagar quando `faturamento_direto = false` e herdar `tipo_compra`.
+- Trigger que propaga `tipo_compra` da solicitação → cotação → OC (via função e default no insert), impedindo alteração manual em cotação (checado na UI e num trigger `BEFORE UPDATE` que rejeita mudança quando vem de solicitação).
 
-Portar páginas: `Dashboard`, `Obras`, `Fornecedores`, `Categorias`, `CentrosCusto`, `Insumos`.
+Grants/RLS: novas colunas herdam as políticas existentes; nenhuma tabela nova.
 
-## Fase 3 — Fluxo de compras
+---
 
-Portar `Solicitacoes`, `Cotacoes` (752 linhas — a maior), `Ordens`, `OrdemForm`.
+## 2. Solicitações (UI)
 
-## Fase 4 — Financeiro + admin
+Arquivo: `src/pages/Solicitacoes.tsx`
 
-Portar `Contas` (pagar/receber), `Fluxo`, `Documentos`, `Usuarios`, `Configuracoes`.
+- Adicionar select **Tipo da Solicitação** (Material / Mão de Obra) — obrigatório.
+- Remover input de **Urgência** do formulário e das colunas visíveis.
+- Adicionar input **Prazo de Entrega Esperado** (date) — obrigatório.
+- Exibir badge do tipo na listagem.
+
+---
+
+## 3. Cotações (UI)
+
+Arquivos: `src/pages/Cotacoes.tsx` (+ eventual `CotacaoForm`)
+
+- Ao criar cotação a partir de solicitação: gravar `tipo_compra` da solicitação; campo fica **read-only**.
+- Validação de fornecedores:
+  - `para_contratacao = false` → mínimo 2, máximo 8.
+  - `para_contratacao = true` → exatamente 1 fornecedor; ocultar UI de múltiplas propostas.
+- Checkbox **Cotação para Contratação**.
+
+---
+
+## 4. Equalização (nova tela)
+
+Nova rota `/cotacoes/:id/equalizacao` → `src/pages/CotacaoEqualizacao.tsx`.
+
+Layout: matriz fornecedores × itens.
+
+- Por célula: Valor Unitário, Valor após Desconto, Frete (edição inline; grava em `cotacao_precos`).
+- Upload de anexo por fornecedor (bucket `documentos`, gravado em `cotacao_envios.anexo_path`).
+- Coluna calculada **Cotação Ótima** = menor `valor_com_desconto` (fallback `valor_unitario`) por item.
+- Botão "Selecionar vencedor" por item/fornecedor grava em `cotacao_decisao`; botão da coluna Ótima é desabilitado.
+
+Adicionar link "Equalização" na listagem de cotações.
+
+---
+
+## 5. Ordens de Compra (UI)
+
+Arquivos: `src/pages/OrdemForm.tsx`, `src/pages/Ordens.tsx`
+
+- Herdar `tipo_compra` da cotação/solicitação de origem (read-only).
+- Adicionar switch **Faturamento Direto** (Sim/Não).
+- Exibir ambos os campos na listagem.
+
+---
+
+## 6. Contas a Pagar (UI)
+
+Arquivo: `src/pages/Contas.tsx` (modo `pagar`)
+
+Reformular o dialog "Nova":
+
+- Toggle: **Com OC** / **Sem OC**.
+
+**Com OC:**
+- Select da OC (apenas OCs sem faturamento direto e ainda sem conta integral).
+- Modo: **Integral** ou **Parcial**.
+  - Integral: preenche automaticamente valor total, centro de custo, tipo.
+  - Parcial: tabela dos itens da OC com quantidade parcial + campo Frete; total calculado. Centro de custo e tipo herdados.
+
+**Sem OC (avulso):**
+- Categoria: Material / Mão de Obra / Imposto (DAS).
+- Centro de custo, vencimento, valor, descrição.
+- Uploads separados: Nota Fiscal e Boleto (bucket `documentos`).
+
+Trigger da OC continua criando a conta integral automaticamente quando `faturamento_direto = false`.
+
+---
 
 ## Detalhes técnicos
 
-- **Roteamento**: cada rota do React Router vira arquivo em `src/routes/`. Rotas protegidas ficam em `_authenticated/`. Rotas com params (`/ordens/:id/editar`) viram `_authenticated/ordens.$id.editar.tsx`.
-- **Permissões por módulo**: mantenho o padrão `RequireModule` como wrapper de componente (não como beforeLoad) para preservar a lógica exata do original.
-- **Dados**: uso o cliente `@/integrations/supabase/client` direto nas páginas (padrão do original), já que o template Lovable Supabase gerencia sessão/RLS pelo browser client. Não vou converter para `createServerFn` — manteria a paridade e evitaria reescrever 3.300 linhas.
-- **Migrações**: consolidadas para evitar dependência de ordem entre 11 arquivos separados.
-- **Edge Functions**: se as originais existirem em `supabase/functions/`, viram TanStack server routes/functions equivalentes na fase correspondente.
-- **Dependências**: instalar `exceljs`, `file-saver`, `jspdf`, `jspdf-autotable`, `date-fns`, `recharts`, e demais que já não estejam no template.
-- **Placeholder `/`**: substituído pelo Dashboard no gate autenticado; usuário deslogado é redirecionado para `/auth`.
+**Backfill**: `UPDATE solicitacoes_compra SET tipo_compra='material' WHERE tipo_compra IS NULL` idem para `cotacoes`, `ordens_compra` (default do enum cobre novos registros).
 
-## Confirmação
+**Impacto em código**: mudanças concentradas em `Solicitacoes.tsx`, `Cotacoes.tsx`, novo `CotacaoEqualizacao.tsx`, `OrdemForm.tsx`, `Ordens.tsx`, `Contas.tsx` + rota no `App.tsx`. Componentes compartilhados (`CentroCustoSelect`, `StatusBadge`, `PageHeader`) reutilizados.
 
-Confirmando o plano, começo pela **Fase 1** agora mesmo. As fases 2–4 acontecem nos próximos turnos conforme você validar cada entrega.
+**Compatibilidade**: nenhuma coluna removida; triggers existentes ajustadas com `IF` para `faturamento_direto`; RLS preservada.
+
+**Não escopo**: reescrever numeração, permissões, ou telas fora do fluxo de compras/financeiro.
+
+---
+
+## Ordem de execução
+
+1. Migração SQL (enum + colunas + ajuste do trigger `oc_gera_conta_pagar`).
+2. Atualizar `Solicitacoes.tsx`.
+3. Atualizar `Cotacoes.tsx` + criar `CotacaoEqualizacao.tsx` + rota.
+4. Atualizar `OrdemForm.tsx` / `Ordens.tsx`.
+5. Reformular `Contas.tsx`.
+6. Smoke test via Playwright em `/solicitacoes`, `/cotacoes`, `/ordens`, `/contas-pagar`.
